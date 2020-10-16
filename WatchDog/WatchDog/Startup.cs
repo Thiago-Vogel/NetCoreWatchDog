@@ -17,7 +17,9 @@ namespace WatchDog
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHealthChecks();
-            services.AddHealthChecksUI()
+            services.AddHealthChecksUI(setupSettings => {
+                setupSettings.SetEvaluationTimeInSeconds(30);
+            })
                 .AddInMemoryStorage();
         }
 
@@ -30,13 +32,13 @@ namespace WatchDog
             }
 
             app.UseRouting();
-            app.UseHealthChecksUI(config => config.UIPath = "/hc-ui");
+            app.UseHealthChecksUI(config => { config.UIPath = "/hc-ui"; config.AddCustomStylesheet(@"wwwroot\css\site.css"); });
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGet("/", async context =>
                 {
-                    await context.Response.WriteAsync("Hello World!");
+                    context.Response.Redirect("/hc-ui");
                 });
             });
         }
